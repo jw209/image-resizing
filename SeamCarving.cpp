@@ -88,25 +88,12 @@ int main (int argc, char* argv[]) {
         vector<vector<int>> outputMat(rows-numH, vector<int>(columns-numV));
         outputMat = removeSeamsDriver(mat, numV, numH);
 
-        /*
-        vector<vector<int>> energyMatrix(rows, vector<int>(columns));
-        energyMatrix = createEnergyMatrix(mat, rows, columns);
-
-        vector<vector<int>> cumulativeEnergyMatrix(rows, vector<int>(columns));
-        cumulativeEnergyMatrix = createCumulativeEnergyMatrix(energyMatrix, rows, columns);
-
-        vector<int> seam = findSeam(cumulativeEnergyMatrix, rows, columns);
-        */
-
-        //removeSeams(mat, seam, rows, columns, numV, numH);
-
         //UNCOMMENT TO OUTPUT FILE
-        
         string fname = argv[1];
         size_t periodIndex = fname.find(".");
         string filename = fname.substr(0, periodIndex);
 
-        string outfilename = filename+"_processed_"+argv[2]+"_"+argv[3]+".pgm";
+        string outfilename = filename+"_processedX_"+argv[2]+"_"+argv[3]+".pgm";
         ofstream outfile(outfilename);
 
         outfile << "P2\n";
@@ -119,9 +106,9 @@ int main (int argc, char* argv[]) {
                 outfile << outputMat[row][col] << " ";
 
         outfile.close();
-    
 
     } else {
+
         // output if incorrect command is given
         cout << "Incorrect command. To run this program use \"./main 'filepath' 'vertical seams' 'horizontal seams'\"" << endl;
         return 1;
@@ -131,8 +118,8 @@ int main (int argc, char* argv[]) {
 }
 
 // TRANSPOSE MATRIX FUNCTION
-// input: matrix to transpose, number of rows in this matrix, number of columns in this matrix
-// output: a transposed matrix
+// input: matrix to transpose
+// output: transposed matrix
 vector<vector<int>> transposeMatrix(vector<vector<int>> matrix) {
 
     std::vector<std::vector<int>> transposedMat(matrix[0].size(), std::vector<int>(matrix.size()));
@@ -145,8 +132,8 @@ vector<vector<int>> transposeMatrix(vector<vector<int>> matrix) {
 }
 
 // CREATE ENERGY MATRIX FUNCTION
-// input: matrix from which to create an energy matrix, number of rows in this matrix, number of columns in this matrix
-// output: an energy matrix of dimension ROWS x COLUMNS
+// input: matrix from which to create an energy matrix
+// output: energy matrix
 vector<vector<int>> createEnergyMatrix(vector<vector<int>> mat) {
 
     vector<vector<int>> energyMap(mat.size(), vector<int>(mat[0].size()));
@@ -261,8 +248,8 @@ int getEnergyOfIndex(int left, int right, int top, int bottom, int numAtIndex, i
 }
 
 // CREATE CUMULATIVE ENERGY MATRIX FUNCTION
-// input: value left of index, value right of index, value above index, value below index, value of index, selector
-// output: energy at index
+// input: energy map
+// output: cumulative energy map
 vector<vector<int>> createCumulativeEnergyMatrix(vector<vector<int>> energyMap) {
 
     vector<vector<int>> cumulativeEnergyMatrix(energyMap.size(), vector<int>(energyMap[0].size()));
@@ -292,11 +279,10 @@ vector<vector<int>> createCumulativeEnergyMatrix(vector<vector<int>> energyMap) 
 }
 
 // REMOVE SEAM FUNCTION
-// 
-// used by the seam driver function to perform removal operations on the matrix
+// input: cumulative energy matrix
+// output: vector holding the path to traverse for seam removal
 vector<int> findSeam(vector<vector<int>> cumulativeEnergyMatrix) {
 
-    
     vector<int> seam(cumulativeEnergyMatrix.size());
     // get lowest value in first row of cumulative energy matrix
     int lowestValue = cumulativeEnergyMatrix[0][0], lowestValueIndex = 0; 
@@ -323,10 +309,18 @@ vector<int> findSeam(vector<vector<int>> cumulativeEnergyMatrix) {
 
         if (lowestValue == cumulativeEnergyMatrix[i][seam[i-1]]) {
             lowestValueIndex = seam[i-1];
-        } else if (lowestValue == cumulativeEnergyMatrix[i][seam[i-1]+1]) {
-            lowestValueIndex = seam[i-1]+1;
-        } else if (lowestValue == cumulativeEnergyMatrix[i][seam[i-1]-1]) {
-            lowestValueIndex = seam[i-1]-1;
+        } 
+
+        if (seam[i-1] != cumulativeEnergyMatrix[i].size()-1) {
+            if (lowestValue == cumulativeEnergyMatrix[i][seam[i-1]+1]) {
+                lowestValueIndex = seam[i-1]+1;
+            } 
+        }
+
+        if (seam[i-1] != 0) {
+            if (lowestValue == cumulativeEnergyMatrix[i][seam[i-1]-1]) {
+                lowestValueIndex = seam[i-1]-1;
+            }
         }
 
         seam[i] = lowestValueIndex;
@@ -350,6 +344,9 @@ void removeSeams(vector<vector<int>> &matrix, vector<int> seam) {
     }
 }
 
+// REMOVE SEAMS DRIVER FUNCTION
+// input: matrix, number of vertical columns to remove, number of horizontal rows to remove
+// output: matrix
 vector<vector<int>> removeSeamsDriver(vector<vector<int>> mat, int numV, int numH) {
 
     vector<vector<int>> originalMatrix(mat.size(), vector<int>(mat[0].size()));
