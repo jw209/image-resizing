@@ -307,15 +307,15 @@ vector<int> findSeam(vector<vector<int>> cumulativeEnergyMatrix) {
             lowestValue = min(cumulativeEnergyMatrix[i][seam[i-1]], min(cumulativeEnergyMatrix[i][seam[i-1]-1], cumulativeEnergyMatrix[i][seam[i-1]+1]));
         }
 
-        if (lowestValue == cumulativeEnergyMatrix[i][seam[i-1]]) {
-            lowestValueIndex = seam[i-1];
-        } 
-
         if (seam[i-1] != cumulativeEnergyMatrix[i].size()-1) {
             if (lowestValue == cumulativeEnergyMatrix[i][seam[i-1]+1]) {
                 lowestValueIndex = seam[i-1]+1;
             } 
         }
+
+        if (lowestValue == cumulativeEnergyMatrix[i][seam[i-1]]) {
+            lowestValueIndex = seam[i-1];
+        } 
 
         if (seam[i-1] != 0) {
             if (lowestValue == cumulativeEnergyMatrix[i][seam[i-1]-1]) {
